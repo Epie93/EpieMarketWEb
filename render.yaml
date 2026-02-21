@@ -7,9 +7,12 @@ services:
     runtime: node
     region: frankfurt
 
-    # Build: installer les deps du backend
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && node server.js
+    # Racine = dossier backend (contient package.json)
+    rootDir: backend
+
+    # Build et start
+    buildCommand: npm install
+    startCommand: node server.js
 
     # Variables d'environnement (STRIPE_SECRET_KEY a configurer dans le Dashboard Render)
     envVars:
