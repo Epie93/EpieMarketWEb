@@ -1,0 +1,18 @@
+# EpieMarket - Deploy sur Render
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: epiemarket
+    runtime: node
+    region: frankfurt
+
+    # Build: installer les deps du backend
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node server.js
+
+    # Variables d'environnement (STRIPE_SECRET_KEY a configurer dans le Dashboard Render)
+    envVars:
+      - key: STRIPE_SECRET_KEY
+        sync: false
+        # Tu devras entrer ta cle secrete Stripe (sk_live_xxxx) dans le Dashboard Render

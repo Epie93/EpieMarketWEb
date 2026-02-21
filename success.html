@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success - EpieMarket</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+        :root {
+            --bg-0: #0a0a0a;
+            --bg-1: #0d0d0d;
+            --bg-2: #111111;
+            --ink-0: #f5f5f5;
+            --ink-1: #c5c5c5;
+            --accent: #1e3a5f;
+            --accent-2: #2d5a87;
+            --accent-3: #4a7ab0;
+            --stroke: #1a1a1a;
+            --success: #00ff9d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Space Grotesk", system-ui, sans-serif;
+            background: radial-gradient(1200px 600px at 20% -10%, rgba(30, 58, 95, 0.2), transparent 60%),
+                        linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
+            color: var(--ink-0);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .success-card {
+            background: var(--bg-1);
+            border: 1px solid var(--stroke);
+            border-radius: 24px;
+            max-width: 560px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+            animation: popIn 0.4s ease-out;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        h1 {
+            font-family: "Bebas Neue", sans-serif;
+            font-size: 2rem;
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: var(--ink-1);
+            margin-bottom: 28px;
+            font-size: 0.95rem;
+        }
+        .keys-box {
+            background: var(--bg-2);
+            border: 1px solid var(--stroke);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: left;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        .keys-box h3 {
+            font-size: 0.9rem;
+            color: var(--accent-3);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .key-item {
+            margin-bottom: 18px;
+        }
+        .key-item:last-child { margin-bottom: 0; }
+        .key-item strong {
+            color: var(--ink-0);
+            font-size: 0.95rem;
+        }
+        .key-item code {
+            display: block;
+            margin-top: 8px;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            word-break: break-all;
+            font-size: 0.85rem;
+            color: var(--success);
+            border: 1px solid rgba(0, 255, 157, 0.2);
+        }
+        .order-id {
+            font-size: 0.9rem;
+            color: var(--accent-3);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--bg-2);
+            border: 1px solid var(--stroke);
+            color: var(--ink-0);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .back-btn:hover {
+            border-color: var(--accent-2);
+            background: rgba(45, 90, 135, 0.15);
+        }
+        .no-data {
+            color: var(--ink-1);
+            padding: 40px 20px;
+        }
+        .no-data a {
+            color: var(--accent-3);
+            text-decoration: none;
+        }
+        .no-data a:hover { text-decoration: underline; }
+        .warning-box {
+            background: rgba(255, 193, 7, 0.12);
+            border: 1px solid rgba(255, 193, 7, 0.4);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #e6d68a;
+        }
+        .warning-box strong { color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="success-card">
+        <div id="content-with-keys" style="display:none;">
+            <div class="success-icon">✅</div>
+            <h1>Payment Successful</h1>
+            <p class="subtitle">Your keys have been delivered. Save them below!</p>
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> If your key is lost, it will <strong>not be refunded</strong>. We strongly recommend saving your key in a secure place before leaving this page.
+            </div>
+            <p class="order-id" id="order-id-display"></p>
+            <div class="keys-box">
+                <h3>🔑 Your Keys</h3>
+                <div id="keys-list"></div>
+            </div>
+            <a href="index.html" class="back-btn">Retour au site</a>
+        </div>
+        <div id="content-no-keys" class="no-data" style="display:none;">
+            <p>No delivery data found.</p>
+            <a href="index.html">Return to EpieMarket</a>
+        </div>
+    </div>
+    <script>
+        (function() {
+            const data = JSON.parse(localStorage.getItem('epie_last_delivery') || 'null');
+            const withKeys = document.getElementById('content-with-keys');
+            const noKeys = document.getElementById('content-no-keys');
+            if (data && data.keys && data.keys.length > 0) {
+                withKeys.style.display = 'block';
+                const orderIdEl = document.getElementById('order-id-display');
+                if (data.orderId) {
+                    orderIdEl.textContent = 'Order ID: ' + data.orderId;
+                    orderIdEl.style.display = 'block';
+                } else {
+                    orderIdEl.style.display = 'none';
+                }
+                document.getElementById('keys-list').innerHTML = data.keys.map(d =>
+                    `<div class="key-item"><strong>${d.product} (${d.plan})</strong><code>${d.keys.join('<br>')}</code></div>`
+                ).join('');
+                localStorage.removeItem('epie_last_delivery');
+            } else {
+                noKeys.style.display = 'block';
+            }
+        })();
+    </script>
+</body>
+</html>
